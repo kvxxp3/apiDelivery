@@ -1,4 +1,4 @@
-from flask import jsonify, Flask
+from flask import jsonify, Flask, json
 from flask_mysqldb import MySQL
 from flask_cors import CORS
 from connection import config
@@ -249,14 +249,89 @@ def listar_usuarios():
         return datosJSON    
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
+    
+#revisar nombre de usuario    
+@app.route('/usuarios/<i>', methods=['GET'])
+def revisar_nombreusuario(i):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT * FROM usuario WHERE nombre_usuario='{0}'".format(i)
+        cursor.execute(sql)
+        
+        if cursor.rowcount == 0:
+            return True
+        else:
+            return False
+          
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
 
-###########################################################################################
-##################################                       ##################################
-###########################################################################################
+##################################################################################################
+################################## ALTA USUARIO-CLIENTE-TARJETA ##################################
+##################################################################################################
+@app.route('/register/<nombre>/<contra>/<correo>/<tipo>', methods=['POST'])
+def alta_registro(nombre, contra, correo, tipo):
+    try:
+        if revisar_nombreusuario(nombre):
+            cursor = conexion.connection.cursor()
+            sql = "INSERT INTO usuario (nombre_usuario, contra, correo, tipo_usuario) VALUES (%s, %s, %s, %s)"
+            record = (nombre, contra, correo, tipo)
+            cursor.execute(sql, record)        
+            conexion.connection.commit()
+            
+            return jsonify({'mensaje':"Datos insertados."})  
+        else:
+            return jsonify({'mensaje':"Nombre de usuario en uso."}) 
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
 
+###########################################################################
+################################## LOGIN ##################################
+###########################################################################
+@app.route('/login/<nombre>/<contra>', methods=['GET'])
+def login(nombre, contra):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT * FROM usuario WHERE nombre_usuario='{0}' AND contra='{1}'".format(nombre, contra)
+        cursor.execute(sql)
+        
+        if cursor.rowcount != 0:
+            return json.dumps(True)
+        else:
+            return json.dumps(False)
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+    
+##################################################################################
+################################## HACER PEDIDO ##################################
+##################################################################################
+@app.route('/pedido/<idP>/<cantidad>', methods=['GET'])
+def login(idP, cantidad):
+    #se toman los datos de producto que es la pagina en donde hace el pedido primero despues hace una alta a detalles-pedido y al final a pedido que es el carrito
+    #se manda el idP, cantidad, el precio final despues de multiplicar la cantidad con el precio del producto
+    #primero se crea el Pedido para sacar id y despues detalles_pedido
+    #sacar fecha y hora del sistema
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT * FROM usuario WHERE nombre_usuario='{0}' AND contra='{1}'".format(nombre, contra)
+        cursor.execute(sql)
+        
+        if cursor.rowcount != 0:
+            return json.dumps(True)
+        else:
+            return json.dumps(False)
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
     
 def non_exist(e):
     return "<h1>La pagina no existe.</h1>"
+
+###########################################################################################
+##################################   LEVANTAR SERVIDOR   ##################################
+###########################################################################################
 
 if __name__ == '__main__':
     app.config.from_object(config['development'])
