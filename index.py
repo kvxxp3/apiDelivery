@@ -159,7 +159,27 @@ def productoID(i):
         datosJSON = jsonify(dato)
         print(dato)
         
-        return datosJSON    
+        return datosJSON  
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+    
+@app.route('/producto/<i>', methods=['GET'])    
+def producto_ID(i):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT * FROM producto WHERE idProducto='{0}'".format(i)
+        cursor.execute(sql)
+        datos = cursor.fetchone()
+        
+        if datos != None:
+            dato={'id':datos[0],'nombre':datos[1],'des':datos[2],'precio':datos[3],'restaurante':datos[4]}
+        else:
+            dato={'id':'NULL','nombre':'NULL','des':'NULL','precio':'NULL','restaurante':'NULL'}
+            
+        datosJSON = jsonify(dato)
+        print(dato)
+        
+        return dato  
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
     
@@ -212,7 +232,7 @@ def restauranteID(i):
 @app.route('/tarjetas', methods=['GET'])
 def listar_tarjetas():
     try:
-        #print('SIRVE')
+        
         cursor = conexion.connection.cursor()
         sql = "SELECT * FROM tarjeta"
         cursor.execute(sql)
@@ -226,7 +246,7 @@ def listar_tarjetas():
         print(data)
         
         return datosJSON 
-        #return jsonify({'mensaje':"Sirve."})
+    
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
 
@@ -266,6 +286,44 @@ def revisar_nombreusuario(i):
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
 
+#devolver id de usuario por correo
+@app.route('/usuario/correo/<i>', methods=['GET'])
+def getIDUsuario(i):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT idUsuario FROM usuario WHERE correo='{0}'".format(i)
+        cursor.execute(sql)
+        
+        datos = cursor.fetchone()
+        id = int(datos[0])
+        
+        datosJSON = jsonify(id)
+        print(id)
+        
+        return datosJSON  
+          
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+
+#devolver tipo de usuario por id
+@app.route('/usuario/id/<i>', methods=['GET'])
+def getTipoUsuario(i):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT tipo_usuario FROM usuario WHERE idUsuario={0}".format(i)
+        cursor.execute(sql)
+        
+        datos = cursor.fetchone()
+        tipo = str(datos[0])
+        
+        datosJSON = jsonify(tipo)
+        print(tipo)
+        
+        return datosJSON
+          
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+
 ##################################################################################################
 ################################## ALTA USUARIO-CLIENTE-TARJETA ##################################
 ##################################################################################################
@@ -279,9 +337,9 @@ def alta_registro(nombre, contra, correo, tipo):
             cursor.execute(sql, record)        
             conexion.connection.commit()
             
-            return jsonify({'mensaje':"Datos insertados."})  
+            return json.dumps(True)
         else:
-            return jsonify({'mensaje':"Nombre de usuario en uso."}) 
+            return json.dumps(False)
         
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
@@ -289,11 +347,11 @@ def alta_registro(nombre, contra, correo, tipo):
 ###########################################################################
 ################################## LOGIN ##################################
 ###########################################################################
-@app.route('/login/<nombre>/<contra>', methods=['GET'])
-def login(nombre, contra):
+@app.route('/login/<correo>/<contra>', methods=['GET'])
+def login(correo, contra):
     try:
         cursor = conexion.connection.cursor()
-        sql = "SELECT * FROM usuario WHERE nombre_usuario='{0}' AND contra='{1}'".format(nombre, contra)
+        sql = "SELECT * FROM usuario WHERE correo='{0}' AND contra='{1}'".format(correo, contra)
         cursor.execute(sql)
         
         if cursor.rowcount != 0:
@@ -307,13 +365,19 @@ def login(nombre, contra):
 ##################################################################################
 ################################## HACER PEDIDO ##################################
 ##################################################################################
-@app.route('/pedido/<idP>/<cantidad>', methods=['GET'])
-def login(idP, cantidad):
-    #se toman los datos de producto que es la pagina en donde hace el pedido primero despues hace una alta a detalles-pedido y al final a pedido que es el carrito
+@app.route('/pedido/<idP>/<idC>/<cantidad>', methods=['POST'])
+def hacer_pedido(idP, idC, cantidad):
+    #se toman los datos de producto que es la pagina en donde hace el producto primero despues hace una alta a detalles-pedido y al final a pedido que es el carrito
     #se manda el idP, cantidad, el precio final despues de multiplicar la cantidad con el precio del producto
     #primero se crea el Pedido para sacar id y despues detalles_pedido
     #sacar fecha y hora del sistema
     try:
+        dato = producto_ID(idP)
+        
+        precioFinal = cantidad * dato.precio
+            
+        dato={'id':datos[0],'nombre':datos[1],'des':datos[2],'precio':datos[3],'restaurante':datos[4]}
+        
         cursor = conexion.connection.cursor()
         sql = "SELECT * FROM usuario WHERE nombre_usuario='{0}' AND contra='{1}'".format(nombre, contra)
         cursor.execute(sql)
