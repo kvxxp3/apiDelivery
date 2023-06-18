@@ -1,10 +1,11 @@
-from flask import jsonify, Flask, json
+from flask import jsonify, Flask, json, request
 from flask_mysqldb import MySQL
 from flask_cors import CORS
 from connection import config
 
 #cambiar hostName por UbuntuServer al estar en red Karla
 hostName = "CasaAgs"
+#hostName = "UbuntuServer"
 serverPort = 5000
 
 app = Flask(__name__)
@@ -132,7 +133,27 @@ def listar_productos():
         datos = cursor.fetchall()
         data=[]
         for fila in datos:
-            dato={'id':fila[0],'nombre':fila[1],'des':fila[2],'precio':fila[3],'restaurante':fila[4]}
+            dato={'id':fila[0],'nombre':fila[1],'des':fila[2],'precio':fila[3],'restaurante':fila[4],'foto':fila[5]}
+            data.append(dato)
+            
+        datosJSON = jsonify(data)
+        print(data)
+        
+        return datosJSON    
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+    
+#TODOS LOS PRODUCTOS POR ID DE RESTAURANTE
+@app.route('/productos/restaurante/<i>', methods=['GET'])
+def productosRes(i):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT * FROM producto WHERE id_restaurante='{0}'".format(i)
+        cursor.execute(sql)
+        datos = cursor.fetchall()
+        data=[]
+        for fila in datos:
+            dato={'id':fila[0],'nombre':fila[1],'des':fila[2],'precio':fila[3],'restaurante':fila[4],'foto':fila[5]}
             data.append(dato)
             
         datosJSON = jsonify(data)
@@ -152,9 +173,9 @@ def productoID(i):
         datos = cursor.fetchone()
         
         if datos != None:
-            dato={'id':datos[0],'nombre':datos[1],'des':datos[2],'precio':datos[3],'restaurante':datos[4]}
+            dato={'id':datos[0],'nombre':datos[1],'des':datos[2],'precio':datos[3],'restaurante':datos[4],'foto':datos[5]}
         else:
-            dato={'id':'NULL','nombre':'NULL','des':'NULL','precio':'NULL','restaurante':'NULL'}
+            dato={'id':'NULL','nombre':'NULL','des':'NULL','precio':'NULL','restaurante':'NULL','foto':'NULL'}
             
         datosJSON = jsonify(dato)
         print(dato)
@@ -172,14 +193,53 @@ def producto_ID(i):
         datos = cursor.fetchone()
         
         if datos != None:
-            dato={'id':datos[0],'nombre':datos[1],'des':datos[2],'precio':datos[3],'restaurante':datos[4]}
+            dato={'id':datos[0],'nombre':datos[1],'des':datos[2],'precio':datos[3],'restaurante':datos[4],'foto':datos[5]}
         else:
-            dato={'id':'NULL','nombre':'NULL','des':'NULL','precio':'NULL','restaurante':'NULL'}
+            dato={'id':'NULL','nombre':'NULL','des':'NULL','precio':'NULL','restaurante':'NULL','foto':'NULL'}
             
         datosJSON = jsonify(dato)
         print(dato)
         
         return dato  
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+   
+#DAR DE ALTA PRODUCTO
+@app.route('/producto/add', methods=['POST'])
+def productoAlta():
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "INSERT INTO producto (nombre, descripcion, precio, id_restaurante, imagen) VALUES ('{0}', '{1}', '{2}', {3}, '{4}')".format(request.json['nombre'], request.json['des'], request.json['precio'], request.json['res'], request.json['imagen'])
+        cursor.execute(sql)        
+        conexion.connection.commit()
+            
+        return jsonify({'mensaje':"Agregado con exito."})
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+   
+#ACTUALIZAR PRODUCTO
+@app.route('/producto/update/<id>', methods=['PUT'])
+def productoUpdate(id):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "UPDATE producto set nombre = '{1}', descripcion = '{2}', precio = '{3}', imagen = '{4}' WHERE idProducto = {0}".format(id, request.json['nombre'], request.json['des'], request.json['precio'], request.json['imagen'])
+        cursor.execute(sql)        
+        conexion.connection.commit()
+            
+        return jsonify({'mensaje':"Actualizado con exito."})
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+
+#ELIMINAR UN PRODUCTO POR ID
+@app.route('/producto/delete/<i>', methods=['DELETE'])
+def deleteProductoID(i):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "DELETE FROM producto WHERE idProducto='{0}'".format(i)
+        cursor.execute(sql)     
+        conexion.connection.commit()
+        
+        return jsonify({'mensaje':"Eliminado con exito."})
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
     
