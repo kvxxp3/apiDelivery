@@ -446,7 +446,7 @@ def revisar_nombreusuario(i):
 
 #devolver id de usuario por correo
 @app.route('/usuario/correo/<i>', methods=['GET'])
-def getIDUsuario(i):
+def getIDUsuarioCorreo(i):
     try:
         cursor = conexion.connection.cursor()
         sql = "SELECT idUsuario FROM usuario WHERE correo='{0}'".format(i)
