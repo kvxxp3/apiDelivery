@@ -60,6 +60,21 @@ def clienteID(i):
         return datosJSON    
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
+   
+#DAR DE ALTA CLIENTE
+@app.route('/altaCliente/<nombre>/<app>/<apm>/<tel>/<usuario>/<tarjeta>', methods=['POST'])
+def altaCliente(nombre, app, apm, tel, usuario, tarjeta):
+    try:
+            cursor = conexion.connection.cursor()
+            sql = "INSERT INTO cliente (nombre, app, apm, numero_telefono, id_usuario, id_tarjeta) VALUES (%s, %s, %s, %s, %s, %s)"
+            record = (nombre, app, apm, tel, usuario, tarjeta)
+            cursor.execute(sql, record)        
+            conexion.connection.commit()
+            
+            return jsonify({'mensaje':"Cliente Valido"})
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
 
 ###################### DETALLES_PEDIDO
 @app.route('/detalles_pedidos', methods=['GET'])
@@ -98,6 +113,40 @@ def listar_direcciones():
         print(data)
         
         return datosJSON    
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+   
+#DAR DE ALTA DIRECCION
+@app.route('/altaDir/<calle>/<colonia>/<numero>/<ref>', methods=['POST'])
+def alta_direccion(calle, colonia, numero, ref):
+    try:
+            cursor = conexion.connection.cursor()
+            sql = "INSERT INTO direccion (calle, colonia, numero, referencia) VALUES (%s, %s, %s, %s)"
+            record = (calle, colonia, numero, ref)
+            cursor.execute(sql, record)        
+            conexion.connection.commit()
+            
+            return jsonify({'mensaje':"Direccion Valida"})
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+
+#get id direccion por calle y numero
+@app.route('/tarjeta/getID/<i>/<x>', methods=['GET'])
+def getID_Direccion(i, x):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT idDireccion FROM direccion WHERE calle='{0}' AND numero='{1}'".format(i, x)
+        cursor.execute(sql)
+        
+        datos = cursor.fetchone()
+        id = int(datos[0])
+        
+        datosJSON = jsonify(id)
+        print(id)
+        
+        return datosJSON  
+          
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
     
@@ -287,6 +336,21 @@ def restauranteID(i):
         return datosJSON    
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
+       
+#DAR DE ALTA RESTAURANTE
+@app.route('/altaRestaurante/<nombre>/<tel>/<sucursal>/<usuario>/<dir>/<tarjeta>', methods=['POST'])
+def altaRes(nombre, tel, sucursal, usuario, dir, tarjeta):
+    try:
+            cursor = conexion.connection.cursor()
+            sql = "INSERT INTO restaurante (nombre, numero_telefono, sucursal, id_usuario, id_dir, id_tarjeta) VALUES (%s, %s, %s, %s, %s, %s)"
+            record = (nombre, tel, sucursal, usuario, dir, tarjeta)
+            cursor.execute(sql, record)        
+            conexion.connection.commit()
+            
+            return jsonify({'mensaje':"Restaurante Valido"})
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
     
 ###################### TARJETAS
 @app.route('/tarjetas', methods=['GET'])
@@ -307,6 +371,40 @@ def listar_tarjetas():
         
         return datosJSON 
     
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+   
+#DAR DE ALTA TARJETA
+@app.route('/altaTarjeta/<tipo>/<clabe>', methods=['POST'])
+def alta_tarjeta(tipo, clabe):
+    try:
+            cursor = conexion.connection.cursor()
+            sql = "INSERT INTO tarjeta (tipo, clabe) VALUES (%s, %s)"
+            record = (tipo, clabe)
+            cursor.execute(sql, record)        
+            conexion.connection.commit()
+            
+            return jsonify({'mensaje':"Tarjeta Valida"})
+        
+    except Exception as ex:
+        return jsonify({'mensaje':"Error: "+ex})
+
+#get id tarjeta por tipo y clabe
+@app.route('/tarjeta/getID/<i>/<x>', methods=['GET'])
+def getIDUsuario(i, x):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT idTarjeta FROM tarjeta WHERE tipo='{0}' AND clabe='{1}'".format(i, x)
+        cursor.execute(sql)
+        
+        datos = cursor.fetchone()
+        id = int(datos[0])
+        
+        datosJSON = jsonify(id)
+        print(id)
+        
+        return datosJSON  
+          
     except Exception as ex:
         return jsonify({'mensaje':"Error: "+ex})
 
