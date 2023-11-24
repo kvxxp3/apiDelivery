@@ -21,5 +21,3 @@ print(connection)
 @app.route('/usuario', methods=['GET'])
 def users():
     return jsonify()
-
-#app.run(debug=True)

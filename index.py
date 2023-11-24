@@ -4,8 +4,9 @@ from flask_cors import CORS
 from connection import config
 
 #cambiar hostName por UbuntuServer al estar en red Karla
-hostName = "CasaAgs"
-#hostName = "UbuntuServer"
+#hostName = "CasaAgs"
+hostName = "UbuntuServer"
+#hostName = "Rancho"
 serverPort = 5000
 
 app = Flask(__name__)
